@@ -1,0 +1,43 @@
+Parameters:
+  KeyName:
+    Description: "Specify the name of an existing KeyPair"
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: "Must be an existing keypair"
+  SSHLocation:
+    Description: "Ip address allowed for SSH to the EC2 instance"
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
+
+Resources:
+  FreeEc2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-423bec20
+      InstanceType: t2.micro
+      SecurityGroups: [!Ref 'InstanceSecurityGroup']
+      KeyName: !Ref 'KeyName'
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref 'SSHLocation'
+Outputs:
+  InstanceId:
+    Description: InstanceId of the new Ec2 instance
+    Value: !Ref 'FreeEc2Instance'
+  AZ:
+    Description: Availability Zone of the Ec2
+    Value: !GetAtt [FreeEc2Instance,AvailabilityZone]
+  PublicDns:
+    Description: DNS of the new Ec2
+    Value: !GetAtt [FreeEc2Instance,PublicDnsName]
+  PublicIP:
+    Description: Public IP address of the new Ec2
+    Value: !GetAtt [FreeEc2Instance,PublicIp]
+      
